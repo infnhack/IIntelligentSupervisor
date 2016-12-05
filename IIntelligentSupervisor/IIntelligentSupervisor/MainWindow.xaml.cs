@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Kinect;
+using Classifier_Train;
 
 namespace IIntelligentSupervisor
 {
@@ -30,7 +31,7 @@ namespace IIntelligentSupervisor
         public MainWindow()
         {
             InitializeComponent();
-
+            
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -54,8 +55,10 @@ namespace IIntelligentSupervisor
             }
         }
 
+        // 挪到线程处理
         void kinectManager_DataReadyEvent(RawImageSource data)
         {
+            #region
             if (data.colorSetted)
             {
                 byte[] filterdColorPixels = new byte[data.colorPixels.Length];
@@ -86,6 +89,17 @@ namespace IIntelligentSupervisor
                             filterdColorPixels[multiVar + 2] = data.colorPixels[multiVar + 2];
                             filterdColorPixels[multiVar + 3] = data.colorPixels[multiVar + 3];
                         }
+
+                        // face recognition
+
+
+                        // smock check
+
+                        // alarm
+
+                        // store
+                        // compress image
+                        //DbManager.save(colorimage, personName, timestamp);
                     }
                 }
                 int mostLikelyIndex = 0;
@@ -103,6 +117,7 @@ namespace IIntelligentSupervisor
                         0);
                 }
             }
+            #endregion
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

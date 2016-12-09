@@ -5,12 +5,63 @@ using System.Text;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using System.Drawing;
+using Microsoft.Kinect;
+using ImageManipulationExtensionMethods;
 
 namespace IIntelligentSupervisor
 {
     public class SmockDetector
     {
-        public bool ChechSmock(Bitmap input)
+        public bool CheckSmock(RawImageSource data)
+        {
+            int[] players = { 0, 0, 0, 0, 0, 0 };
+            int[] xMin = { 0, 0, 0, 0, 0, 0 };
+            int[] xMax = { 0, 0, 0, 0, 0, 0 };
+            int[] yMin = { 0, 0, 0, 0, 0, 0 };
+            int[] yMax = { 0, 0, 0, 0, 0, 0 };
+
+            for (int y = 0; y < data.depthHeight; y++)
+            {
+                for (int x = 0; x < data.depthWidth; x++)
+                {
+                    int depthIndex = x + y * data.depthWidth;
+
+                    DepthImagePixel depthPixel = data.depthPixels[depthIndex];
+
+                    int player = depthPixel.PlayerIndex - 1;
+
+                    ColorImagePoint colorImagePoint = data.colorCoordinates[depthIndex];
+                    //int colorIndex = (int)(colorImagePoint.X + colorImagePoint.Y * this.colorBitmap.Width);
+                    if (player >= 0)
+                    {
+                        xMin[player] = Math.Min(xMin[player], colorImagePoint.X);
+                        xMax[player] = Math.Max(xMax[player], colorImagePoint.X);
+                        yMin[player] = Math.Min(xMin[player], colorImagePoint.Y);
+                        yMax[player] = Math.Max(xMax[player], colorImagePoint.Y);
+                        players[player] += 1;
+                        //int multiVar = (PixelFormats.Bgr32.BitsPerPixel + 7) / 8 * colorIndex;
+                        ////multiVar = kinectManager.sensor.ColorStream.FrameBytesPerPixel * colorIndex;
+                        //filterdColorPixels[multiVar] = data.colorPixels[multiVar];
+                        //filterdColorPixels[multiVar + 1] = data.colorPixels[multiVar + 1];
+                        //filterdColorPixels[multiVar + 2] = data.colorPixels[multiVar + 2];
+                        //filterdColorPixels[multiVar + 3] = data.colorPixels[multiVar + 3];
+                    }
+                }
+            }
+            int mostLikelyIndex = 0;
+            for (int j = 1; j < 6; j++)
+            {
+                if (players[j] > players[j - 1])
+                    mostLikelyIndex = j;
+            }
+            Image<Bgr, byte> cvImage = data.colorPixels.ToBitmap(data.colorWidth, data.colorHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb).ToOpenCVImage<Bgr, byte>();
+            cvImage.ROI = new Rectangle(xMin[mostLikelyIndex], yMin[mostLikelyIndex], xMax[mostLikelyIndex] - xMin[mostLikelyIndex],
+                yMax[mostLikelyIndex] - yMin[mostLikelyIndex]);
+            Image<Bgr, byte> humanArea = cvImage.Copy();
+            return true;
+        }
+
+        public bool IsBlueMost(Bitmap input)
         {
             bool value;
             int counter = 0;
@@ -45,7 +96,12 @@ namespace IIntelligentSupervisor
             return value;
         }
 
-        public static Image<Gray, byte> CheckColor(Image<Bgr, byte> original)
+        public Image<Gray, byte> IsBlueMost(Image<Bgr, byte> original)
+        {
+            return IsBlueMost(original, 90, 115);
+        }
+
+        public Image<Gray, byte> IsBlueMost(Image<Bgr, byte> original, double minScalar, double maxScalar)
         {
             //var image = imgRgb.InRange(new Bgr(190, 190, 190), new Bgr(255, 255, 255));
 
@@ -58,7 +114,7 @@ namespace IIntelligentSupervisor
                 try
                 {
                     // 3. Remove all pixels from the hue channel that are not in the range [40, 60]
-                    CvInvoke.cvInRangeS(channels[0], new Gray(40).MCvScalar, new Gray(60).MCvScalar, channels[0]);
+                    CvInvoke.cvInRangeS(channels[0], new Gray(minScalar).MCvScalar, new Gray(maxScalar).MCvScalar, channels[0]);
 
                     // 4. Display the result
                     //imageBox1.Image = channels[0];
@@ -70,7 +126,6 @@ namespace IIntelligentSupervisor
                 }
                 return channels[0];
             }
-
         }
     }
 }

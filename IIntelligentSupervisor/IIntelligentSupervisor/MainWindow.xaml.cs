@@ -12,7 +12,12 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Kinect;
-using Classifier_Train;
+using ImageManipulationExtensionMethods;
+using System.Threading;
+using System.Collections.Concurrent;
+using Emgu.CV;
+using Emgu.CV.Structure;
+using System.Drawing;
 
 namespace IIntelligentSupervisor
 {
@@ -23,10 +28,18 @@ namespace IIntelligentSupervisor
     {
         KinectManager kinectManager;
 
+        ConcurrentQueue<RawImageSource> dataBuffer;
+
+        //public List<RawImageSource> dataBuffer;
+
         /// <summary>
         /// Bitmap that will hold color information
         /// </summary>
         private WriteableBitmap colorBitmap;
+
+        private Image<Bgr, byte> imgUT = null;
+
+        private SmockDetector detector;
 
         public MainWindow()
         {
@@ -45,13 +58,43 @@ namespace IIntelligentSupervisor
                 // Set the image we display to point to the bitmap where we'll put the image data
                 this.Displayer.Source = this.colorBitmap;
 
+                dataBuffer = new ConcurrentQueue<RawImageSource>();
+
+                detector = new SmockDetector();
+
                 // sensor started
                 kinectManager.DataReadyEvent += new KinectManager.DataReadyHandler(kinectManager_DataReadyEvent);
+
+                Thread bgWorker = new Thread(DataHandleThread);
+                bgWorker.Name = "Background Image Worker";
+                bgWorker.IsBackground = true;
+                bgWorker.Start();
             }
             else
             {
                 MessageBox.Show("Please connect Kinect first");
                 this.Close();
+            }
+        }
+
+        private void DataHandleThread(object o)
+        {
+            SmockDetector detector = new SmockDetector();
+            while (true)
+            {
+                if (!dataBuffer.IsEmpty)
+                {
+                    RawImageSource newData;
+                    if (dataBuffer.TryDequeue(out newData))
+                    {
+                        if (!detector.CheckSmock(newData))
+                        {
+                            // not wear a smock
+                        }
+                    }
+
+                }
+                Thread.Sleep(10);
             }
         }
 
@@ -61,12 +104,16 @@ namespace IIntelligentSupervisor
             #region
             if (data.colorSetted)
             {
-                byte[] filterdColorPixels = new byte[data.colorPixels.Length];
-                //Array.Clear(filterdColorPixels, 0, filterdColorPixels.Length);
-                for (int j = 0; j < data.colorPixels.Length; j++)
-                    filterdColorPixels[j] = 0xFF;
+                this.Displayer.Source = data.colorPixels.ToBitmapSource(System.Windows.Media.PixelFormats.Bgr32, data.colorWidth, data.colorHeight);
+                dataBuffer.Enqueue(data);
 
+                //test
                 int[] players = { 0, 0, 0, 0, 0, 0 };
+                int[] xMin = { 0, 0, 0, 0, 0, 0 };
+                int[] xMax = { 0, 0, 0, 0, 0, 0 };
+                int[] yMin = { 0, 0, 0, 0, 0, 0 };
+                int[] yMax = { 0, 0, 0, 0, 0, 0 };
+
                 for (int y = 0; y < data.depthHeight; y++)
                 {
                     for (int x = 0; x < data.depthWidth; x++)
@@ -78,28 +125,21 @@ namespace IIntelligentSupervisor
                         int player = depthPixel.PlayerIndex - 1;
 
                         ColorImagePoint colorImagePoint = data.colorCoordinates[depthIndex];
-                        int colorIndex = (int)(colorImagePoint.X + colorImagePoint.Y * this.colorBitmap.Width);
+                        //int colorIndex = (int)(colorImagePoint.X + colorImagePoint.Y * this.colorBitmap.Width);
                         if (player >= 0)
                         {
+                            xMin[player] = Math.Min(xMin[player], colorImagePoint.X);
+                            xMax[player] = Math.Max(xMax[player], colorImagePoint.X);
+                            yMin[player] = Math.Min(xMin[player], colorImagePoint.Y);
+                            yMax[player] = Math.Max(xMax[player], colorImagePoint.Y);
                             players[player] += 1;
-                            int multiVar = (PixelFormats.Bgr32.BitsPerPixel + 7) / 8 * colorIndex;
-                            //multiVar = kinectManager.sensor.ColorStream.FrameBytesPerPixel * colorIndex;
-                            filterdColorPixels[multiVar] = data.colorPixels[multiVar];
-                            filterdColorPixels[multiVar + 1] = data.colorPixels[multiVar + 1];
-                            filterdColorPixels[multiVar + 2] = data.colorPixels[multiVar + 2];
-                            filterdColorPixels[multiVar + 3] = data.colorPixels[multiVar + 3];
+                            //int multiVar = (PixelFormats.Bgr32.BitsPerPixel + 7) / 8 * colorIndex;
+                            ////multiVar = kinectManager.sensor.ColorStream.FrameBytesPerPixel * colorIndex;
+                            //filterdColorPixels[multiVar] = data.colorPixels[multiVar];
+                            //filterdColorPixels[multiVar + 1] = data.colorPixels[multiVar + 1];
+                            //filterdColorPixels[multiVar + 2] = data.colorPixels[multiVar + 2];
+                            //filterdColorPixels[multiVar + 3] = data.colorPixels[multiVar + 3];
                         }
-
-                        // face recognition
-
-
-                        // smock check
-
-                        // alarm
-
-                        // store
-                        // compress image
-                        //DbManager.save(colorimage, personName, timestamp);
                     }
                 }
                 int mostLikelyIndex = 0;
@@ -108,14 +148,15 @@ namespace IIntelligentSupervisor
                     if (players[j] > players[j - 1])
                         mostLikelyIndex = j;
                 }
-                if (players[mostLikelyIndex] > 1000)
+                if (players[mostLikelyIndex] > 5000)
                 {
-                    this.colorBitmap.WritePixels(
-                        new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
-                        filterdColorPixels,
-                        this.colorBitmap.PixelWidth * sizeof(int),
-                        0);
+                    Image<Bgr, byte> cvImage = data.colorPixels.ToBitmap(data.colorWidth, data.colorHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb).ToOpenCVImage<Bgr, byte>();
+                    cvImage.ROI = new System.Drawing.Rectangle(xMin[mostLikelyIndex], yMin[mostLikelyIndex], xMax[mostLikelyIndex] - xMin[mostLikelyIndex],
+                        yMax[mostLikelyIndex] - yMin[mostLikelyIndex]);
+                    Image<Bgr, byte> humanArea = cvImage.Copy();
+                    //this.LoadedImage.Source = detector.IsBlueMost(humanArea, 90, 115).ToBitmapSource();
                 }
+                //end of test
             }
             #endregion
         }
@@ -125,6 +166,43 @@ namespace IIntelligentSupervisor
             MessageBox.Show("IS will close.");
             if (kinectManager != null)
                 kinectManager.StopSensor();
+        }
+
+        private void btnLoadImg_Click(object sender, RoutedEventArgs e)
+        {
+            // Create OpenFileDialog 
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+
+
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".png";
+            dlg.Filter = "JPEG Files (*.jpeg)|*.jpeg|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif";
+
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            Nullable<bool> result = dlg.ShowDialog();
+
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                string filename = dlg.FileName;
+                this.txtImageFile.Text = filename;
+                imgUT = new Image<Bgr, byte>(filename);
+                this.LoadedImage.Source = imgUT.ToBitmapSource();
+            }
+        }
+
+        private void btnCheckImg_Click(object sender, RoutedEventArgs e)
+        {
+            if (imgUT != null)
+            {
+                double minValue = Convert.ToDouble(this.txtMinorValue.Text);
+                double maxValue = Convert.ToDouble(this.txtMaxValue.Text);
+                this.CheckedImage.Source = detector.IsBlueMost(imgUT, minValue, maxValue).ToBitmapSource();
+            }
         }
 
 

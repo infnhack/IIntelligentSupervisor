@@ -14,27 +14,37 @@
         <Grid Grid.Column="1" Background="AliceBlue">
             <Grid.RowDefinitions>
                 <RowDefinition />
-                <RowDefinition Height="30"/>
+                <RowDefinition />
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                <Image Grid.Column="0" Name="LoadedImage"/>
-                <Image Grid.Column="1" Name="CheckedImage"/>
-            </Grid>       
+            <Grid Grid.Row="0" Background="Yellow">
+                <TextBlock Name="txtInfo" Text="{Binding Status}" FontSize="26" TextWrapping="Wrap" />
+            </Grid>
             <Grid Grid.Row="1">
-                <StackPanel Orientation="Horizontal">
-                    <TextBox Text="Choose an image...   " Name="txtImageFile"></TextBox>
-                    <Button Name="btnLoadImg" Content="Load" Padding="5" Click="btnLoadImg_Click"></Button>
-                    <TextBlock Text=" "/>
-                    <TextBox Name="txtMinorValue" Width="30"/>
-                    <TextBlock Text="-"/>
-                    <TextBox Name="txtMaxValue" Width="30"/>
-                    <Button Name="btnCheckImg" Content="Check" Padding="5" Click="btnCheckImg_Click"></Button>
-                </StackPanel>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Column="0" Name="LoadedImage"/>
+                    <Image Grid.Column="1" Name="CheckedImage"/>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Text="Choose an image...   " Name="txtImageFile"></TextBox>
+                        <Button Name="btnLoadImg" Content="Load" Padding="5" Click="btnLoadImg_Click"></Button>
+                        <TextBlock Text=" "/>
+                        <TextBox Name="txtMinorValue" Width="30"/>
+                        <TextBlock Text="-"/>
+                        <TextBox Name="txtMaxValue" Width="30"/>
+                        <Button Name="btnCheckImg" Content="Check" Padding="5" Click="btnCheckImg_Click"></Button>
+                    </StackPanel>
+                </Grid>
             </Grid>
         </Grid>
+        
     </Grid>
 </Window>

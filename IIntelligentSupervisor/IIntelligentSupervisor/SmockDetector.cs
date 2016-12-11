@@ -12,88 +12,14 @@ namespace IIntelligentSupervisor
 {
     public class SmockDetector
     {
-        public bool CheckSmock(RawImageSource data)
+        public bool CheckSmock(Image<Bgr, byte> humanArea)
         {
-            int[] players = { 0, 0, 0, 0, 0, 0 };
-            int[] xMin = { 0, 0, 0, 0, 0, 0 };
-            int[] xMax = { 0, 0, 0, 0, 0, 0 };
-            int[] yMin = { 0, 0, 0, 0, 0, 0 };
-            int[] yMax = { 0, 0, 0, 0, 0, 0 };
-
-            for (int y = 0; y < data.depthHeight; y++)
-            {
-                for (int x = 0; x < data.depthWidth; x++)
-                {
-                    int depthIndex = x + y * data.depthWidth;
-
-                    DepthImagePixel depthPixel = data.depthPixels[depthIndex];
-
-                    int player = depthPixel.PlayerIndex - 1;
-
-                    ColorImagePoint colorImagePoint = data.colorCoordinates[depthIndex];
-                    //int colorIndex = (int)(colorImagePoint.X + colorImagePoint.Y * this.colorBitmap.Width);
-                    if (player >= 0)
-                    {
-                        xMin[player] = Math.Min(xMin[player], colorImagePoint.X);
-                        xMax[player] = Math.Max(xMax[player], colorImagePoint.X);
-                        yMin[player] = Math.Min(xMin[player], colorImagePoint.Y);
-                        yMax[player] = Math.Max(xMax[player], colorImagePoint.Y);
-                        players[player] += 1;
-                        //int multiVar = (PixelFormats.Bgr32.BitsPerPixel + 7) / 8 * colorIndex;
-                        ////multiVar = kinectManager.sensor.ColorStream.FrameBytesPerPixel * colorIndex;
-                        //filterdColorPixels[multiVar] = data.colorPixels[multiVar];
-                        //filterdColorPixels[multiVar + 1] = data.colorPixels[multiVar + 1];
-                        //filterdColorPixels[multiVar + 2] = data.colorPixels[multiVar + 2];
-                        //filterdColorPixels[multiVar + 3] = data.colorPixels[multiVar + 3];
-                    }
-                }
-            }
-            int mostLikelyIndex = 0;
-            for (int j = 1; j < 6; j++)
-            {
-                if (players[j] > players[j - 1])
-                    mostLikelyIndex = j;
-            }
-            Image<Bgr, byte> cvImage = data.colorPixels.ToBitmap(data.colorWidth, data.colorHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb).ToOpenCVImage<Bgr, byte>();
-            cvImage.ROI = new Rectangle(xMin[mostLikelyIndex], yMin[mostLikelyIndex], xMax[mostLikelyIndex] - xMin[mostLikelyIndex],
-                yMax[mostLikelyIndex] - yMin[mostLikelyIndex]);
-            Image<Bgr, byte> humanArea = cvImage.Copy();
-            return true;
-        }
-
-        public bool IsBlueMost(Bitmap input)
-        {
-            bool value;
-            int counter = 0;
-            Image<Bgr, byte> imgRgb = new Image<Bgr, byte>(input);
-            Image<Lab, float> imgLab = imgRgb.Convert<Lab, float>();
-            int width = imgLab.Width;
-            int height = imgLab.Height;
-
-            for (int i = 0; i < width; i++)
-            {
-                for (int j = 0; j < height; j++)
-                {
-                    if (((imgLab[j, i].X) * 100.0 / 255.0 >= 50.0) && ((imgLab[j, i].X) * 100.0 / 255.0 <= 70.0) && ((imgLab[j, i].Y) - 128 >= 67) && ((imgLab[j, i].Y) - 128 <= 75) && ((imgLab[j, i].Z) - 128 >= 60) && ((imgLab[j, i].Z) - 128 <= 80))
-                    {
-                        counter += 1;
-                    }
-
-                }
-            }
-            if (counter >= ((width * height) / 100) * 50)
-            {
-                value = true;
-            }
+            int totalPixel = humanArea.Width * humanArea.Height;
+            int blueCount = CvInvoke.cvCountNonZero(this.IsBlueMost(humanArea));
+            if (blueCount > totalPixel * 0.5)
+                return true;
             else
-            {
-                value = false;
-            }
-
-
-            //textBox2.Text = imgLab[50, 50].ToString();
-
-            return value;
+                return false;
         }
 
         public Image<Gray, byte> IsBlueMost(Image<Bgr, byte> original)

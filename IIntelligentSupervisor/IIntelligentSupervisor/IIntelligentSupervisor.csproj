@@ -71,6 +71,8 @@
     <Compile Include="ImageUtil.cs" />
     <Compile Include="RawImageSource.cs" />
     <Compile Include="SmockDetector.cs" />
+    <Compile Include="Supervisor.cs" />
+    <Compile Include="UIDataModel.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

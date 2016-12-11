@@ -28,7 +28,9 @@ namespace IIntelligentSupervisor
     {
         KinectManager kinectManager;
 
-        ConcurrentQueue<RawImageSource> dataBuffer;
+        Supervisor sv;
+
+        UIDataModel uiData;
 
         //public List<RawImageSource> dataBuffer;
 
@@ -39,17 +41,19 @@ namespace IIntelligentSupervisor
 
         private Image<Bgr, byte> imgUT = null;
 
-        private SmockDetector detector;
 
         public MainWindow()
         {
-            InitializeComponent();
-            
+            InitializeComponent();            
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
+            uiData = new UIDataModel();
+            this.txtInfo.DataContext = uiData;
+            sv = new Supervisor(uiData);
             kinectManager = new KinectManager();
+
             if (kinectManager.InitializeSensor())
             {
                 // This is the bitmap we'll display on-screen
@@ -58,45 +62,25 @@ namespace IIntelligentSupervisor
                 // Set the image we display to point to the bitmap where we'll put the image data
                 this.Displayer.Source = this.colorBitmap;
 
-                dataBuffer = new ConcurrentQueue<RawImageSource>();
-
-                detector = new SmockDetector();
-
                 // sensor started
                 kinectManager.DataReadyEvent += new KinectManager.DataReadyHandler(kinectManager_DataReadyEvent);
 
-                Thread bgWorker = new Thread(DataHandleThread);
+                Thread bgWorker = new Thread(this.sv.DataHandleThreadMethod);
                 bgWorker.Name = "Background Image Worker";
                 bgWorker.IsBackground = true;
                 bgWorker.Start();
+
+                uiData.Status = "Kinect Connected";
             }
             else
             {
-                MessageBox.Show("Please connect Kinect first");
-                this.Close();
+                uiData.Status = "Kinect Not Connected";
+                MessageBox.Show("Please connect Kinect first and restart this application.");
+                //this.Close();
             }
         }
 
-        private void DataHandleThread(object o)
-        {
-            SmockDetector detector = new SmockDetector();
-            while (true)
-            {
-                if (!dataBuffer.IsEmpty)
-                {
-                    RawImageSource newData;
-                    if (dataBuffer.TryDequeue(out newData))
-                    {
-                        if (!detector.CheckSmock(newData))
-                        {
-                            // not wear a smock
-                        }
-                    }
-
-                }
-                Thread.Sleep(10);
-            }
-        }
+        
 
         // 挪到线程处理
         void kinectManager_DataReadyEvent(RawImageSource data)
@@ -105,58 +89,7 @@ namespace IIntelligentSupervisor
             if (data.colorSetted)
             {
                 this.Displayer.Source = data.colorPixels.ToBitmapSource(System.Windows.Media.PixelFormats.Bgr32, data.colorWidth, data.colorHeight);
-                dataBuffer.Enqueue(data);
-
-                //test
-                int[] players = { 0, 0, 0, 0, 0, 0 };
-                int[] xMin = { 0, 0, 0, 0, 0, 0 };
-                int[] xMax = { 0, 0, 0, 0, 0, 0 };
-                int[] yMin = { 0, 0, 0, 0, 0, 0 };
-                int[] yMax = { 0, 0, 0, 0, 0, 0 };
-
-                for (int y = 0; y < data.depthHeight; y++)
-                {
-                    for (int x = 0; x < data.depthWidth; x++)
-                    {
-                        int depthIndex = x + y * data.depthWidth;
-
-                        DepthImagePixel depthPixel = data.depthPixels[depthIndex];
-
-                        int player = depthPixel.PlayerIndex - 1;
-
-                        ColorImagePoint colorImagePoint = data.colorCoordinates[depthIndex];
-                        //int colorIndex = (int)(colorImagePoint.X + colorImagePoint.Y * this.colorBitmap.Width);
-                        if (player >= 0)
-                        {
-                            xMin[player] = Math.Min(xMin[player], colorImagePoint.X);
-                            xMax[player] = Math.Max(xMax[player], colorImagePoint.X);
-                            yMin[player] = Math.Min(xMin[player], colorImagePoint.Y);
-                            yMax[player] = Math.Max(xMax[player], colorImagePoint.Y);
-                            players[player] += 1;
-                            //int multiVar = (PixelFormats.Bgr32.BitsPerPixel + 7) / 8 * colorIndex;
-                            ////multiVar = kinectManager.sensor.ColorStream.FrameBytesPerPixel * colorIndex;
-                            //filterdColorPixels[multiVar] = data.colorPixels[multiVar];
-                            //filterdColorPixels[multiVar + 1] = data.colorPixels[multiVar + 1];
-                            //filterdColorPixels[multiVar + 2] = data.colorPixels[multiVar + 2];
-                            //filterdColorPixels[multiVar + 3] = data.colorPixels[multiVar + 3];
-                        }
-                    }
-                }
-                int mostLikelyIndex = 0;
-                for (int j = 1; j < 6; j++)
-                {
-                    if (players[j] > players[j - 1])
-                        mostLikelyIndex = j;
-                }
-                if (players[mostLikelyIndex] > 5000)
-                {
-                    Image<Bgr, byte> cvImage = data.colorPixels.ToBitmap(data.colorWidth, data.colorHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb).ToOpenCVImage<Bgr, byte>();
-                    cvImage.ROI = new System.Drawing.Rectangle(xMin[mostLikelyIndex], yMin[mostLikelyIndex], xMax[mostLikelyIndex] - xMin[mostLikelyIndex],
-                        yMax[mostLikelyIndex] - yMin[mostLikelyIndex]);
-                    Image<Bgr, byte> humanArea = cvImage.Copy();
-                    //this.LoadedImage.Source = detector.IsBlueMost(humanArea, 90, 115).ToBitmapSource();
-                }
-                //end of test
+                this.sv.AddNewData(data);
             }
             #endregion
         }
@@ -176,7 +109,7 @@ namespace IIntelligentSupervisor
 
 
             // Set filter for file extension and default file extension 
-            dlg.DefaultExt = ".png";
+            dlg.DefaultExt = ".jpg";
             dlg.Filter = "JPEG Files (*.jpeg)|*.jpeg|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif";
 
 
@@ -199,10 +132,12 @@ namespace IIntelligentSupervisor
         {
             if (imgUT != null)
             {
+                SmockDetector detector = new SmockDetector();
                 double minValue = Convert.ToDouble(this.txtMinorValue.Text);
                 double maxValue = Convert.ToDouble(this.txtMaxValue.Text);
                 this.CheckedImage.Source = detector.IsBlueMost(imgUT, minValue, maxValue).ToBitmapSource();
             }
+            this.uiData.Status = "Checking Image";
         }
 
 

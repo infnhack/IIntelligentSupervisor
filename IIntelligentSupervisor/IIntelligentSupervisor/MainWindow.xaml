@@ -37,14 +37,13 @@
                         <TextBox Text="Choose an image...   " Name="txtImageFile"></TextBox>
                         <Button Name="btnLoadImg" Content="Load" Padding="5" Click="btnLoadImg_Click"></Button>
                         <TextBlock Text=" "/>
-                        <TextBox Name="txtMinorValue" Width="30"/>
+                        <TextBox Name="txtMinorValue" Width="30" Text="1" />
                         <TextBlock Text="-"/>
-                        <TextBox Name="txtMaxValue" Width="30"/>
+                        <TextBox Name="txtMaxValue" Width="30" Text="500" />
                         <Button Name="btnCheckImg" Content="Check" Padding="5" Click="btnCheckImg_Click"></Button>
                     </StackPanel>
                 </Grid>
             </Grid>
         </Grid>
-        
     </Grid>
 </Window>

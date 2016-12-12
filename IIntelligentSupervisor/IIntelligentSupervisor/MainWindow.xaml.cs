@@ -41,10 +41,14 @@ namespace IIntelligentSupervisor
 
         private Image<Bgr, byte> imgUT = null;
 
+        private SmockDetector detector;
+
+        
 
         public MainWindow()
         {
-            InitializeComponent();            
+            InitializeComponent();
+            
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -53,7 +57,6 @@ namespace IIntelligentSupervisor
             this.txtInfo.DataContext = uiData;
             sv = new Supervisor(uiData);
             kinectManager = new KinectManager();
-
             if (kinectManager.InitializeSensor())
             {
                 // This is the bitmap we'll display on-screen
@@ -61,6 +64,8 @@ namespace IIntelligentSupervisor
 
                 // Set the image we display to point to the bitmap where we'll put the image data
                 this.Displayer.Source = this.colorBitmap;
+
+                detector = new SmockDetector();
 
                 // sensor started
                 kinectManager.DataReadyEvent += new KinectManager.DataReadyHandler(kinectManager_DataReadyEvent);
@@ -110,7 +115,7 @@ namespace IIntelligentSupervisor
 
             // Set filter for file extension and default file extension 
             dlg.DefaultExt = ".jpg";
-            dlg.Filter = "JPEG Files (*.jpeg)|*.jpeg|PNG Files (*.png)|*.png|JPG Files (*.jpg)|*.jpg|GIF Files (*.gif)|*.gif";
+            dlg.Filter = "JPG Files (*.jpg)|*.jpg|JPEG Files (*.jpeg)|*.jpeg|PNG Files (*.png)|*.png|GIF Files (*.gif)|*.gif";
 
 
             // Display OpenFileDialog by calling ShowDialog method 
@@ -138,6 +143,15 @@ namespace IIntelligentSupervisor
                 this.CheckedImage.Source = detector.IsBlueMost(imgUT, minValue, maxValue).ToBitmapSource();
             }
             this.uiData.Status = "Checking Image";
+            
+			// test2
+            if (imgUT != null)
+            {
+                FaceRecognition faceRec = new FaceRecognition();
+                string name;
+                Image<Bgr, byte> newFrame = faceRec.FaceRec(imgUT, out name);
+                this.Displayer.Source = newFrame.ToBitmapSource();
+            }
         }
 
 

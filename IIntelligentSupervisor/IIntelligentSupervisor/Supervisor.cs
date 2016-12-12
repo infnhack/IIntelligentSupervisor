@@ -16,6 +16,7 @@ namespace IIntelligentSupervisor
         private SmockDetector detector;
         private ConcurrentQueue<RawImageSource> dataBuffer;
         private UIDataModel dataModel;
+        private FaceRecognition faceRec;
 
         private int lastPlayerCount = 0;
         private int frameCount = 0;
@@ -30,6 +31,8 @@ namespace IIntelligentSupervisor
             dataBuffer = new ConcurrentQueue<RawImageSource>();
             detector = new SmockDetector();
             dataModel = dm;
+
+            faceRec = new FaceRecognition();
         }
 
         public void AddNewData(RawImageSource data)
@@ -49,6 +52,10 @@ namespace IIntelligentSupervisor
                     {
                         HandleData(data);
                     }
+
+                    // Recognize faces. the name will return by out parameter, it will be "UNKNOW" if not recognized.
+                    string nameRecognized;
+                    Image<Bgr, byte> newFrame = faceRec.FaceRec(data, out nameRecognized);                    
                 }
                 Thread.Sleep(10);
             }

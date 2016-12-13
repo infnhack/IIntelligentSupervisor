@@ -20,6 +20,7 @@ import com.infinera.model.User;
 public class UserAddPanel extends JPanel {
 	private JTextField usernameField;
 	private JTextField emailField;
+
 	/**
 	 * Create the panel.
 	 */
@@ -107,20 +108,20 @@ public class UserAddPanel extends JPanel {
 
 		return true;
 	}
-	
+
 	public void saveUserInput() {
-		User user = new User();
-		user.setName(usernameField.getText());
-		user.setEmail(emailField.getText());
-		
+		User user = new User(usernameField.getText(), emailField.getText());
+		// user.setName(usernameField.getText());
+		// user.setEmail(emailField.getText());
+		//
 		UserDao userDao = new UserDao();
 		userDao.create(user);
-		
+
 		resetInput();
-		
+
 		JOptionPane.showMessageDialog(null, "Add user successfully");
 	}
-	
+
 	public void resetInput() {
 		usernameField.setText("");
 		emailField.setText("");

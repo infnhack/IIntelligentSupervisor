@@ -12,9 +12,6 @@
 			<column name="NAME" />
 		</property>
 		
-		<property name="password" type="java.lang.String" not-null="true">
-			<column name="password" />
-		</property>
 		<property name="email" type="java.lang.String" not-null="true">
 			<column name="email" />
 		</property>		

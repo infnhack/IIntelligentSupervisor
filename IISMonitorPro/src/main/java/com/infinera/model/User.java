@@ -1,6 +1,15 @@
 package com.infinera.model;
 
 public class User {
+	public User() {
+
+	}
+
+	public User(String name, String email) {
+		this.name = name;
+		this.email = email;
+	}
+
 	public Integer getId() {
 		return id;
 	}
@@ -17,14 +26,6 @@ public class User {
 		this.name = name;
 	}
 
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
 	public String getEmail() {
 		return email;
 	}
@@ -33,8 +34,7 @@ public class User {
 		this.email = email;
 	}
 
-	Integer id;
-	String name;
-	String password;
-	String email;
+	private Integer id;
+	private String name;
+	private String email;
 }

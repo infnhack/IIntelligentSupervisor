@@ -50,10 +50,10 @@ DROP TABLE IF EXISTS `tb_user_access_records`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tb_user_access_records` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
   `photo_path` varchar(255) NOT NULL,
   `access_date` datetime NOT NULL,
   `is_legal` tinyint(1) NOT NULL,
+  `user_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_tb_user_access_records` (`user_id`),
   CONSTRAINT `FK_tb_user_access_records` FOREIGN KEY (`user_id`) REFERENCES `tb_users` (`id`) ON DELETE CASCADE
@@ -66,7 +66,11 @@ CREATE TABLE `tb_user_access_records` (
 
 LOCK TABLES `tb_user_access_records` WRITE;
 /*!40000 ALTER TABLE `tb_user_access_records` DISABLE KEYS */;
-INSERT INTO `tb_user_access_records` VALUES (1,1,'C:photo','2016-12-11 09:47:37',1),(2,1,'c:photo','2016-12-11 09:47:37',1),(3,1,'c:\\photo','2016-12-11 09:47:37',1),(4,1,'C:\\photo\\my.jpg','2016-12-11 09:51:26',1);
+INSERT INTO `tb_user_access_records` VALUES 
+(1,'C:\\photo\\aa.jpg','2016-12-11 09:47:37',1, 1),
+(2,'c:\\photo\\1.jpg','2016-12-11 09:47:37', 1, 1),
+(3,'c:\\photo\\2.jpg','2016-12-11 09:47:37', 1, 1),
+(4,'C:\\photo\\my.jpg','2016-12-11 09:51:26',1, 1);
 /*!40000 ALTER TABLE `tb_user_access_records` ENABLE KEYS */;
 UNLOCK TABLES;
 

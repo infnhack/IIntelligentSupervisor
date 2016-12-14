@@ -39,11 +39,7 @@ namespace IIntelligentSupervisor
         /// </summary>
         private WriteableBitmap colorBitmap;
 
-        private Image<Bgr, byte> imgUT = null;
-
-        private SmockDetector detector;
-
-        
+        private Image<Bgr, byte> imgUT = null;        
 
         public MainWindow()
         {
@@ -54,8 +50,9 @@ namespace IIntelligentSupervisor
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             uiData = new UIDataModel();
-            this.txtInfo.DataContext = uiData;
+            this.gridRoot.DataContext = uiData;
             sv = new Supervisor(uiData);
+            sv.AlarmOccurEvent += new Supervisor.AlarmOccurHandler(sv_AlarmOccurEvent);
             kinectManager = new KinectManager();
             if (kinectManager.InitializeSensor())
             {
@@ -64,8 +61,6 @@ namespace IIntelligentSupervisor
 
                 // Set the image we display to point to the bitmap where we'll put the image data
                 this.Displayer.Source = this.colorBitmap;
-
-                detector = new SmockDetector();
 
                 // sensor started
                 kinectManager.DataReadyEvent += new KinectManager.DataReadyHandler(kinectManager_DataReadyEvent);
@@ -83,6 +78,20 @@ namespace IIntelligentSupervisor
                 MessageBox.Show("Please connect Kinect first and restart this application.");
                 //this.Close();
             }
+        }
+
+        void sv_AlarmOccurEvent(object data)
+        {
+            //RawImageSource humanArea = (RawImageSource)data;
+            this.Dispatcher.BeginInvoke((Action)delegate()
+            {
+                Image<Bgr, byte> humanArea = (Image<Bgr, byte>)data;
+                //BitmapSource bs = humanArea.colorPixels.ToBitmapSource(PixelFormats.Bgr32, humanArea.colorWidth, humanArea.colorHeight);
+                System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+                image.Source = humanArea.ToBitmapSource();
+                this.panelPicList.Children.Add(image);
+            }
+            );
         }
 
         
@@ -141,16 +150,25 @@ namespace IIntelligentSupervisor
                 double minValue = Convert.ToDouble(this.txtMinorValue.Text);
                 double maxValue = Convert.ToDouble(this.txtMaxValue.Text);
                 this.CheckedImage.Source = detector.IsBlueMost(imgUT, minValue, maxValue).ToBitmapSource();
-            }
-            this.uiData.Status = "Checking Image";
-            
-			// test2
+            }        
+        }
+
+        private void btnTakePic_Click(object sender, RoutedEventArgs e)
+        {
+            BitmapSource bs = (BitmapSource)this.Displayer.Source;
+            this.imgUT = bs.ToBitmap().ToOpenCVImage<Bgr, byte>();
+            this.LoadedImage.Source = bs;
+        }
+
+        private void btnFaceRec_Click(object sender, RoutedEventArgs e)
+        {
+            // test2
             if (imgUT != null)
             {
                 FaceRecognition faceRec = new FaceRecognition();
                 string name;
                 Image<Bgr, byte> newFrame = faceRec.FaceRec(imgUT, out name);
-                this.Displayer.Source = newFrame.ToBitmapSource();
+                this.CheckedImage.Source = newFrame.ToBitmapSource();
             }
         }
 

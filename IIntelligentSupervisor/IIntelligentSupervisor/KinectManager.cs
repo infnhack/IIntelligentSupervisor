@@ -23,7 +23,7 @@ namespace IIntelligentSupervisor
         /// <summary>
         /// Format we will use for the color stream
         /// </summary>
-        public const ColorImageFormat ColorFormat = ColorImageFormat.RgbResolution640x480Fps30;
+        public const ColorImageFormat ColorFormat = ColorImageFormat.RgbResolution1280x960Fps12; //.RgbResolution640x480Fps30;
 
         /// <summary>
         /// Active Kinect sensor
@@ -160,10 +160,11 @@ namespace IIntelligentSupervisor
                 {
                     skeletonFrame.CopySkeletonDataTo(rawData.frameSkeletons);
                     rawData.skeletonSetted = true;
+                    rawData.SetBodyInfo(this.sensor);
                 }
             }
 
-            if (rawData.colorSetted || rawData.depthSetted || rawData.skeletonSetted)
+            if (rawData.colorSetted && rawData.depthSetted && rawData.skeletonSetted)
                 OnDataReadyEvent(rawData);
         }
 

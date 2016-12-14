@@ -33,6 +33,17 @@ public class UserDao extends AbstractDao {
 		return (User) super.getById(User.class, id);
 	}
 	
+	public int getIdByName(String name) {
+		List<User> list = findAll();
+		
+		for (User user : list) {
+			if (user.getName().equals(name)) {
+				return user.getId();
+			}
+		}
+		return -1;
+	}
+	
 	public List<User> findAll() {
 		return (List<User>) super.findAll(User.class);
 	}

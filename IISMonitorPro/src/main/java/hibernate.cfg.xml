@@ -9,11 +9,18 @@
 		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/db_hackthon</property>
 		<property name="hibernate.connection.username">root</property>
 		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
-		<property name="hibernate.show_sql">true</property>
+		<property name="hibernate.show_sql">false</property>
 		<property name="hibernate.format_sql">true</property>
 		<property name="hbm2ddl.auto">update</property>
-		
+		<property name=""></property>
+
+
 		<mapping resource="com/infinera/model/Admin.hbm.xml" />
 		<mapping resource="com/infinera/model/AccessRecord.hbm.xml" />
+		<mapping resource="com/infinera/model/User.hbm.xml" />
+		<!--  
+		<mapping resource="com/infinera/model/Department.hbm.xml" />
+		<mapping resource="com/infinera/model/Employee.hbm.xml" />
+		-->
 	</session-factory>
 </hibernate-configuration>

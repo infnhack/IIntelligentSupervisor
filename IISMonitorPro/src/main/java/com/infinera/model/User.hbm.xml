@@ -11,9 +11,15 @@
 		<property name="name" type="java.lang.String" not-null="true">
 			<column name="NAME" />
 		</property>
-		
+
 		<property name="email" type="java.lang.String" not-null="true">
 			<column name="email" />
-		</property>		
+		</property>
+        <!--  
+		<set name="records" cascade="all" lazy="true">
+			<key column="user_id"></key>
+			<one-to-many class="AccessRecord" />
+		</set>
+		-->
 	</class>
 </hibernate-mapping>

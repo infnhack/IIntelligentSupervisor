@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 using System.Runtime.InteropServices;
 
-namespace ConsoleApplicationTest
+namespace IIntelligentSupervisor
 {
-    public static class WavePlayer
+    public class WavePlayer
     {
         [DllImport("winmm.dll", SetLastError = true)]
         static extern bool PlaySound(string pszSound, UIntPtr hmod, uint fdwSound);
@@ -46,22 +47,70 @@ namespace ConsoleApplicationTest
             SND_RESOURCE = 0x00040004
         }
 
-        public static void Play(string strFileName)
+        private Thread bgWorker;
+        private bool welcomeFlag = false;
+        private bool alarmFlag = false;
+
+
+        public WavePlayer()
+        {
+            bgWorker = new Thread(playThread);
+            bgWorker.Name = "Background sound player";
+            bgWorker.IsBackground = true;
+            bgWorker.Start();
+        }
+
+        ~WavePlayer()
+        {
+            bgWorker.Abort();
+        }
+
+        public void Play(string strFileName)
         {
             PlaySound(strFileName, UIntPtr.Zero,
                (uint)(SoundFlags.SND_FILENAME | SoundFlags.SND_SYNC | SoundFlags.SND_NOSTOP));
         }
 
-        public static void mciPlay(string strFileName)
+        public void mciPlay(string strFileName)
         {
             string playCommand = "open " + strFileName + " type WAVEAudio alias MyWav";
             mciSendString(playCommand, null, 0, IntPtr.Zero);
             mciSendString("play MyWav", null, 0, IntPtr.Zero);
 
         }
-        public static void sndPlay(string strFileName)
+        public void sndPlay(string strFileName)
         {
             sndPlaySound(strFileName, (long)SoundFlags.SND_SYNC);
+        }
+
+        public void playWelcome()
+        {
+            welcomeFlag = true;
+        }
+
+        public void playAlarm()
+        {
+            alarmFlag = true;
+        }
+
+        private void playThread()
+        {
+            while (true)
+            {
+                if (welcomeFlag)
+                {
+                    welcomeFlag = false;
+                    Play("Sound/welcome.wav");
+                }
+
+                if (alarmFlag)
+                {
+                    alarmFlag = false;
+                    Play("Sound/WARN.wav");
+                }
+
+                Thread.Sleep(10);
+            }
         }
 
     }

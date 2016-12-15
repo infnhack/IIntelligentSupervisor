@@ -18,7 +18,6 @@ using System.Collections.Concurrent;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using System.Drawing;
-using ConsoleApplicationTest;
 
 namespace IIntelligentSupervisor
 {
@@ -40,7 +39,8 @@ namespace IIntelligentSupervisor
         /// </summary>
         private WriteableBitmap colorBitmap;
 
-        private Image<Bgr, byte> imgUT = null;        
+        private Image<Bgr, byte> imgUT = null;
+        WavePlayer wavPlayer;
 
         public MainWindow()
         {
@@ -55,6 +55,9 @@ namespace IIntelligentSupervisor
             sv = new Supervisor(uiData);
             sv.AlarmOccurEvent += new Supervisor.AlarmOccurHandler(sv_AlarmOccurEvent);
             kinectManager = new KinectManager();
+
+            wavPlayer = new WavePlayer();
+
             if (kinectManager.InitializeSensor())
             {
                 // This is the bitmap we'll display on-screen
@@ -82,8 +85,9 @@ namespace IIntelligentSupervisor
         }
 
         void sv_AlarmOccurEvent(object data)
-        {
-            WavePlayer.Play("WARN.WAV");
+        {            
+            //wavPlayer.playWelcome();
+            wavPlayer.playAlarm();
 
             //EmailSender.sendEmailQQ();
             //TestDatabase.testCase();
@@ -190,7 +194,6 @@ namespace IIntelligentSupervisor
                 sv_AlarmOccurEvent(newFrame);
             }
         }
-
 
     }
 }

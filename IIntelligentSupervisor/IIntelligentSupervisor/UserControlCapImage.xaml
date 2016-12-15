@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="IIntelligentSupervisor.UserControlCapImage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="220" d:DesignWidth="220" xmlns:my="clr-namespace:IIntelligentSupervisor" Loaded="UserControl_Loaded">
+    <Grid Width="200" Height="200">
+        <Image Source="/IIntelligentSupervisor;component/Images/Penguins.jpg" Name="imageFill">
+            <Image.OpacityMask>
+                <RadialGradientBrush Center="0.5,0.5">
+                    <GradientStop Color="#00000000" Offset="1" />
+                    <GradientStop Color="#FF000000" Offset="0.9" />
+                    <GradientStop Color="#FF000000" Offset="0" />
+                </RadialGradientBrush>
+            </Image.OpacityMask>
+        </Image>
+        <TextBlock VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="20" Name="txtName"  Text="Unknown" Margin="0,0,0,5" />
+    </Grid>
+</UserControl>

@@ -35,6 +35,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
+import javax.swing.DefaultComboBoxModel;
 
 public class RecordsMgmt extends JInternalFrame {
 
@@ -70,6 +71,7 @@ public class RecordsMgmt extends JInternalFrame {
 	 */
 	public RecordsMgmt() {
 		setBounds(100, 100, 900, 400);
+		setClosable(true);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		// gridBagLayout.rowWeights = new double[] {1.0, 1.0, 1.0, 1.0, 1.0,
 		// 1.0, 1.0, 1.0, 1.0, 1.0};
@@ -89,8 +91,9 @@ public class RecordsMgmt extends JInternalFrame {
 		getContentPane().add(legalLabel,
 				new GBC(0, 2, 1, 1).setWeight(100, 100).setInsets(1).setFill(GridBagConstraints.HORIZONTAL));
 
-		String[] legalItems = new String[] { "Both", "Yes", "No" };
-		legaComboBox = new JComboBox<String>(legalItems);
+//		String[] legalItems = new String[] { "Both", "Yes", "No" };
+		legaComboBox = new JComboBox<String>();
+		legaComboBox.setModel(new DefaultComboBoxModel(new String[] {"Both", "Yes", "No"}));
 		// legaComboBox.add
 		// legaComboBox.setSelectedIndex(-1);
 

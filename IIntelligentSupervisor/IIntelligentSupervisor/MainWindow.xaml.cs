@@ -18,6 +18,7 @@ using System.Collections.Concurrent;
 using Emgu.CV;
 using Emgu.CV.Structure;
 using System.Drawing;
+using ConsoleApplicationTest;
 
 namespace IIntelligentSupervisor
 {
@@ -82,7 +83,17 @@ namespace IIntelligentSupervisor
 
         void sv_AlarmOccurEvent(object data)
         {
+            WavePlayer.Play("WARN.WAV");
+
+            //EmailSender.sendEmailQQ();
+            //TestDatabase.testCase();
+            //DateTime dt = DateTime.Now;
+            //Console.WriteLine(dt.ToString("yyyy-MM-dd HH:mm:ss")); //2016/12/10 12:12:35
+            //Visitor.getId("Jinguang");
+            //AccessRecord.addRecord("Jinguang", true, "C:\\\\photo\\\\my.jpg");
+
             //RawImageSource humanArea = (RawImageSource)data;
+
             this.Dispatcher.BeginInvoke((Action)delegate()
             {
                 Image<Bgr, byte> humanArea = (Image<Bgr, byte>)data;
@@ -93,8 +104,9 @@ namespace IIntelligentSupervisor
                 {
                     this.gridRight.Children.RemoveAt(9);
                 }
-                this.gridRight.Children.Insert(0, new UserControl1("unknown", humanArea));
+                this.gridRight.Children.Insert(0, new UserControlCapImage("unknown", humanArea));
                 this.imgDisplayer.Source = humanArea.ToBitmapSource();
+
             }
             );
         }

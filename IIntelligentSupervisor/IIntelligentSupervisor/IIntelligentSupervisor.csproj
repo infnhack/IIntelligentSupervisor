@@ -290,6 +290,12 @@
     <Folder Include="Properties\DataSources\" />
     <Folder Include="Training Info\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ConsoleApplicationTest\ConsoleApplicationTest\ConsoleApplicationTest.csproj">
+      <Project>{4C9C49D7-7CBF-46D4-BF0E-A23A19418277}</Project>
+      <Name>ConsoleApplicationTest</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

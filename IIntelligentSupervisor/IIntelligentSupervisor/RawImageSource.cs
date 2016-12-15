@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Kinect;
+using System.Windows;
 
 namespace IIntelligentSupervisor
 {
@@ -25,9 +26,11 @@ namespace IIntelligentSupervisor
             this.colorPixels = new byte[sensor.ColorStream.FramePixelDataLength];
             this.colorCoordinates = new ColorImagePoint[sensor.DepthStream.FramePixelDataLength];
             this.frameSkeletons = new Skeleton[sensor.SkeletonStream.FrameSkeletonArrayLength];
+            this.bodys = new List<Body>();
 
             sensor.CoordinateMapper.MapDepthFrameToColorFrame(KinectManager.DepthFormat
                 , this.depthPixels, KinectManager.ColorFormat, this.colorCoordinates);
+
         }
 
         public RawImageSource(byte[] colorPixels, KinectSensor sensor)
@@ -84,6 +87,7 @@ namespace IIntelligentSupervisor
 
             sensor.CoordinateMapper.MapDepthFrameToColorFrame(KinectManager.DepthFormat
                 , this.depthPixels, KinectManager.ColorFormat, this.colorCoordinates);
+                        
         }
 
         public bool colorSetted;
@@ -130,5 +134,52 @@ namespace IIntelligentSupervisor
         public int colorHeight;
 
         public Skeleton[] frameSkeletons;
+
+        public List<Body> bodys;
+
+        public bool hasbody = false;
+
+
+
+        private ColorImagePoint GetJointPoint(KinectSensor sensor, Joint joint)
+        {
+            //DepthImagePoint point = this.sensor.MapSkeletonPointToDepth(joint.Position, this.sensor.DepthStream.Format);
+            DepthImagePoint point = sensor.CoordinateMapper.MapSkeletonPointToDepthPoint(joint.Position, sensor.DepthStream.Format);
+            ColorImagePoint cpoint = sensor.CoordinateMapper.MapDepthPointToColorPoint(sensor.DepthStream.Format, point, sensor.ColorStream.Format);
+
+            return cpoint;
+        }
+
+        public void SetBodyInfo(KinectSensor sensor)
+        {
+            hasbody = false;
+            if (skeletonSetted)
+            {
+                Skeleton skeleton;
+
+                for (int i = 0; i < this.frameSkeletons.Length; i++)
+                {
+                    skeleton = this.frameSkeletons[i];
+                    if (skeleton.TrackingState == SkeletonTrackingState.Tracked)
+                    {
+                        Body b = new Body();
+                        b.Head = GetJointPoint(sensor, skeleton.Joints[JointType.Head]);
+                        b.ShoulderCenter   = GetJointPoint(sensor, skeleton.Joints[JointType.ShoulderCenter]);
+                        b.ShoulderLeft     = GetJointPoint(sensor, skeleton.Joints[JointType.ShoulderLeft  ]);
+                        b.Spine            = GetJointPoint(sensor, skeleton.Joints[JointType.Spine         ]);
+                        b.ShoulderRight    = GetJointPoint(sensor, skeleton.Joints[JointType.ShoulderRight ]);
+                        b.HipCenter        = GetJointPoint(sensor, skeleton.Joints[JointType.HipCenter     ]);
+                        b.HipLeft          = GetJointPoint(sensor, skeleton.Joints[JointType.HipLeft       ]);
+                        b.HipRight         = GetJointPoint(sensor, skeleton.Joints[JointType.HipRight      ]);
+                        System.Console.WriteLine(b.ToString());
+                        if (b.HipCenter.Y > b.ShoulderCenter.Y && b.Head.Y < b.ShoulderCenter.Y && (b.HipCenter.Y - b.ShoulderCenter.Y) > (b.ShoulderCenter.Y - b.Head.Y))
+                        {
+                            bodys.Add(b);
+                            hasbody = true;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

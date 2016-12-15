@@ -68,6 +68,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Body.cs" />
     <Compile Include="Classifier_Train.cs" />
     <Compile Include="EmguImageExtensions.cs" />
     <Compile Include="FaceRecognition.cs" />

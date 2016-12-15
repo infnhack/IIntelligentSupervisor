@@ -2,14 +2,27 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="600" Width="800" Loaded="Window_Loaded" Closing="Window_Closing">
-    <Grid>
+    <Grid Name="gridRoot">
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
         <Grid Grid.Column="0" Background="Cyan">
-            <Image Name="Displayer"/>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Image Name="Displayer"/>
+            </Grid>
+            <Grid Grid.Row="1">
+                <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                    <StackPanel Name="panelPicList" Orientation="Horizontal" CanHorizontallyScroll="True">
+
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
         </Grid>
         <Grid Grid.Column="1" Background="AliceBlue">
             <Grid.RowDefinitions>
@@ -17,7 +30,11 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <Grid Grid.Row="0" Background="Yellow">
-                <TextBlock Name="txtInfo" Text="{Binding Status}" FontSize="26" TextWrapping="Wrap" />
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Name="txtInfo" Text="{Binding Status}" FontSize="26" TextWrapping="Wrap" />
+                    <TextBlock Name="txtName" Text="{Binding Name}" FontSize="26" TextWrapping="Wrap" />
+                    <TextBlock Name="txtListLength" Text="{Binding ListLength}" FontSize="26" TextWrapping="Wrap" />
+                </StackPanel>
             </Grid>
             <Grid Grid.Row="1">
                 <Grid.RowDefinitions>
@@ -34,13 +51,15 @@
                 </Grid>
                 <Grid Grid.Row="1">
                     <StackPanel Orientation="Horizontal">
+                        <Button Name="btnTakePic" Content="Photo" Padding="5" Click="btnTakePic_Click"></Button>
                         <TextBox Text="Choose an image...   " Name="txtImageFile"></TextBox>
                         <Button Name="btnLoadImg" Content="Load" Padding="5" Click="btnLoadImg_Click"></Button>
                         <TextBlock Text=" "/>
-                        <TextBox Name="txtMinorValue" Width="30" Text="1" />
+                        <TextBox Name="txtMinorValue" Width="30" Text="90" />
                         <TextBlock Text="-"/>
-                        <TextBox Name="txtMaxValue" Width="30" Text="500" />
+                        <TextBox Name="txtMaxValue" Width="30" Text="115" />
                         <Button Name="btnCheckImg" Content="Check" Padding="5" Click="btnCheckImg_Click"></Button>
+                        <Button Name="btnFaceRec" Content="FaceRec" Padding="5" Click="btnFaceRec_Click"></Button>
                     </StackPanel>
                 </Grid>
             </Grid>

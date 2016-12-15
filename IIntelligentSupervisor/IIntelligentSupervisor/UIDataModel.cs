@@ -19,6 +19,28 @@ namespace IIntelligentSupervisor
             }
         }
 
+        private string name = "NotSet";
+        public string Name
+        {
+            get { return name; }
+            set
+            {
+                name = value;
+                RaisePropertyChanged("Name");
+            }
+        }
+
+        private string listLength = "NotSet";
+        public string ListLength
+        {
+            get { return listLength; }
+            set
+            {
+                listLength = value;
+                RaisePropertyChanged("ListLength");
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void RaisePropertyChanged(string propertyName)
         {

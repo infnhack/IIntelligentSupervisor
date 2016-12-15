@@ -78,6 +78,12 @@
     <Compile Include="SmockDetector.cs" />
     <Compile Include="Supervisor.cs" />
     <Compile Include="UIDataModel.cs" />
+    <Compile Include="UserControl1.xaml.cs">
+      <DependentUpon>UserControl1.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UserControlCapImage.xaml.cs">
+      <DependentUpon>UserControlCapImage.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -91,6 +97,14 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="UserControl1.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControlCapImage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -122,6 +136,8 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\Penguins.jpg" />
+    <Resource Include="Images\504524912880791153.png" />
     <Content Include="Lib\Emgu.CV.dll" />
     <Content Include="Lib\Emgu.CV.UI.dll" />
     <Content Include="Lib\Emgu.Util.dll" />
@@ -271,7 +287,14 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Properties\DataSources\" />
     <Folder Include="Training Info\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ConsoleApplicationTest\ConsoleApplicationTest\ConsoleApplicationTest.csproj">
+      <Project>{4C9C49D7-7CBF-46D4-BF0E-A23A19418277}</Project>
+      <Name>ConsoleApplicationTest</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

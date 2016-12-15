@@ -8,6 +8,7 @@ using Emgu.CV.Structure;
 using ImageManipulationExtensionMethods;
 using Microsoft.Kinect;
 using System.Threading;
+using System.Drawing;
 
 namespace IIntelligentSupervisor
 {
@@ -129,7 +130,7 @@ namespace IIntelligentSupervisor
 
                     if (xMax[i] > xMin[i] && yMax[i] > yMin[i])
                     {
-                        using (Image<Bgr, byte> cvImage = data.colorPixels.ToBitmap(data.colorWidth, data.colorHeight, System.Drawing.Imaging.PixelFormat.Format32bppRgb).ToOpenCVImage<Bgr, byte>())
+                        using (Image<Bgr, byte> cvImage = data.colorPixels.ToBitmap(data.colorWidth, data.colorHeight,System.Drawing.Imaging.PixelFormat.Format32bppRgb).ToOpenCVImage<Bgr, byte>())
                         {
                             if (frameCount % 20 == 0)
                             {
@@ -146,19 +147,31 @@ namespace IIntelligentSupervisor
                             {
                                 if (!detector.CheckSmock(humanArea))
                                 {
-                                    // not wear a smock
-                                    notWearSmockFrames++;
-                                    if ((frameCount > 10 && notWearSmockFrames > 0.6 * frameCount)) // && (!alarmed))
-                                    {
-                                        this.dataModel.Status = "Alarm by body" + " " + frameCount + " " + notWearSmockFrames;
-                                        alarmed = true;
-                                        if (frameCount % 10 == 0)
-                                        {
-                                            System.Console.WriteLine("" + xMin[i] + "\t" + xMax[i] + "\t" + yMin[i] + "\t" + yMax[i]);
-                                            if (AlarmOccurEvent != null)
-                                                AlarmOccurEvent(humanArea.Resize(1.0, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR));
-                                        }
-                                    }
+                                    cvImage.Draw(rect, new Bgr(Color.Red), 2);
+                                    //// not wear a smock
+                                    //notWearSmockFrames++;
+                                    //if ((frameCount > 10 && notWearSmockFrames > 0.6 * frameCount)) // && (!alarmed))
+                                    //{
+                                    //    this.dataModel.Status = "Alarm by body" + " " + frameCount + " " + notWearSmockFrames;
+                                    //    alarmed = true;
+                                    //    if (frameCount % 10 == 0)
+                                    //    {
+                                    //        System.Console.WriteLine("" + xMin[i] + "\t" + xMax[i] + "\t" + yMin[i] + "\t" + yMax[i]);
+                                    //        if (AlarmOccurEvent != null)
+                                    //        {
+                                    //            cvImage.Draw(rect, new Bgr(Color.Red), 2);
+                                    //            AlarmOccurEvent(cvImage.Resize(1.0, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR));
+                                    //        }
+                                    //    }
+                                    //}
+                                }
+                                else
+                                {
+                                    cvImage.Draw(rect, new Bgr(Color.Green), 2);
+                                }
+                                if (AlarmOccurEvent != null)
+                                {
+                                    AlarmOccurEvent(cvImage.Resize(0.5, Emgu.CV.CvEnum.INTER.CV_INTER_LINEAR));
                                 }
                             }
 

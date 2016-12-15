@@ -50,7 +50,7 @@ namespace IIntelligentSupervisor
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             uiData = new UIDataModel();
-            this.gridRoot.DataContext = uiData;
+            //this.gridRoot.DataContext = uiData;
             sv = new Supervisor(uiData);
             sv.AlarmOccurEvent += new Supervisor.AlarmOccurHandler(sv_AlarmOccurEvent);
             kinectManager = new KinectManager();
@@ -60,7 +60,7 @@ namespace IIntelligentSupervisor
                 this.colorBitmap = new WriteableBitmap(kinectManager.sensor.ColorStream.FrameWidth, kinectManager.sensor.ColorStream.FrameHeight, 96.0, 96.0, PixelFormats.Bgr32, null);
 
                 // Set the image we display to point to the bitmap where we'll put the image data
-                this.Displayer.Source = this.colorBitmap;
+                this.imgDisplayer.Source = this.colorBitmap;
 
                 // sensor started
                 kinectManager.DataReadyEvent += new KinectManager.DataReadyHandler(kinectManager_DataReadyEvent);
@@ -87,9 +87,14 @@ namespace IIntelligentSupervisor
             {
                 Image<Bgr, byte> humanArea = (Image<Bgr, byte>)data;
                 //BitmapSource bs = humanArea.colorPixels.ToBitmapSource(PixelFormats.Bgr32, humanArea.colorWidth, humanArea.colorHeight);
-                System.Windows.Controls.Image image = new System.Windows.Controls.Image();
-                image.Source = humanArea.ToBitmapSource();
-                this.panelPicList.Children.Add(image);
+                //System.Windows.Controls.Image image = new System.Windows.Controls.Image();
+                //image.Source = humanArea.ToBitmapSource();
+                if (this.gridRight.Children.Count > 10)
+                {
+                    this.gridRight.Children.RemoveAt(9);
+                }
+                this.gridRight.Children.Insert(0, new UserControl1("unknown", humanArea));
+                this.imgDisplayer.Source = humanArea.ToBitmapSource();
             }
             );
         }
@@ -102,7 +107,7 @@ namespace IIntelligentSupervisor
             #region
             if (data.colorSetted)
             {
-                this.Displayer.Source = data.colorPixels.ToBitmapSource(System.Windows.Media.PixelFormats.Bgr32, data.colorWidth, data.colorHeight);
+                //this.imgDisplayer.Source = data.colorPixels.ToBitmapSource(System.Windows.Media.PixelFormats.Bgr32, data.colorWidth, data.colorHeight);
                 this.sv.AddNewData(data);
             }
             #endregion
@@ -136,9 +141,9 @@ namespace IIntelligentSupervisor
             {
                 // Open document 
                 string filename = dlg.FileName;
-                this.txtImageFile.Text = filename;
+                //this.txtImageFile.Text = filename;
                 imgUT = new Image<Bgr, byte>(filename);
-                this.LoadedImage.Source = imgUT.ToBitmapSource();
+                //this.LoadedImage.Source = imgUT.ToBitmapSource();
             }
         }
 
@@ -147,17 +152,18 @@ namespace IIntelligentSupervisor
             if (imgUT != null)
             {
                 SmockDetector detector = new SmockDetector();
-                double minValue = Convert.ToDouble(this.txtMinorValue.Text);
-                double maxValue = Convert.ToDouble(this.txtMaxValue.Text);
-                this.CheckedImage.Source = detector.IsBlueMost(imgUT, minValue, maxValue).ToBitmapSource();
+                //double minValue = Convert.ToDouble(this.txtMinorValue.Text);
+                //double maxValue = Convert.ToDouble(this.txtMaxValue.Text);
+                //this.CheckedImage.Source = detector.IsBlueMost(imgUT, minValue, maxValue).ToBitmapSource();
             }        
         }
 
         private void btnTakePic_Click(object sender, RoutedEventArgs e)
         {
-            BitmapSource bs = (BitmapSource)this.Displayer.Source;
+            BitmapSource bs = (BitmapSource)this.imgDisplayer.Source;
             this.imgUT = bs.ToBitmap().ToOpenCVImage<Bgr, byte>();
-            this.LoadedImage.Source = bs;
+            //this.LoadedImage.Source = bs;
+            sv_AlarmOccurEvent(this.imgUT);
         }
 
         private void btnFaceRec_Click(object sender, RoutedEventArgs e)
@@ -168,7 +174,8 @@ namespace IIntelligentSupervisor
                 FaceRecognition faceRec = new FaceRecognition();
                 string name;
                 Image<Bgr, byte> newFrame = faceRec.FaceRec(imgUT, out name);
-                this.CheckedImage.Source = newFrame.ToBitmapSource();
+                //this.CheckedImage.Source = newFrame.ToBitmapSource();
+                sv_AlarmOccurEvent(newFrame);
             }
         }
 

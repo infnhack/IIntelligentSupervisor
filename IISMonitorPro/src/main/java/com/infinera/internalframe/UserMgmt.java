@@ -45,7 +45,7 @@ public class UserMgmt extends JInternalFrame {
 		setTitle("Admin Management");
 		setIconifiable(true);
 		setClosable(true);
-		setBounds(100, 100, 600, 400);
+		setBounds(0, 0, 600, 400);
 //		getContentPane().setLayout(null);
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -55,7 +55,7 @@ public class UserMgmt extends JInternalFrame {
 		final UserAddPanel addPanel = new UserAddPanel();
 		final UserDelPanel delPanel = new UserDelPanel();
 		tabbedPane.addTab("Add user", null, addPanel, "Add user");
-		tabbedPane.addTab("Delete user", null, delPanel, "Delete user");
+		tabbedPane.addTab("Modify/Delete user", null, delPanel, "Modify/Delete user");
 		tabbedPane.addChangeListener(new ChangeListener() {
 			
 			public void stateChanged(ChangeEvent e) {

@@ -45,7 +45,7 @@ public class AdminMgmt extends JInternalFrame {
 		setTitle("Admin Management");
 		setIconifiable(true);
 		setClosable(true);
-		setBounds(100, 100, 600, 400);
+		setBounds(0, 0, 600, 400);
 //		getContentPane().setLayout(null);
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);

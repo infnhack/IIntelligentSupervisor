@@ -130,6 +130,13 @@ public class AdminDelPanel extends JPanel {
 
 		saveButton = new JButton("Save");
 		add(saveButton, new GBC(9, 10, 1, 1).setWeight(100, 100).setInsets(1).setFill(GridBagConstraints.HORIZONTAL));
+		saveButton.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
 	}
 
 	public void initTable() {

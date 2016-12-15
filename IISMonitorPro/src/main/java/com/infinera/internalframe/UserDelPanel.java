@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -17,9 +18,9 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
-import com.infinera.dao.AdminDao;
+import org.apache.commons.validator.routines.EmailValidator;
+
 import com.infinera.dao.UserDao;
-import com.infinera.model.Admin;
 import com.infinera.model.User;
 
 public class UserDelPanel extends JPanel {
@@ -31,6 +32,7 @@ public class UserDelPanel extends JPanel {
 	private JButton saveButton;
 	private DefaultTableModel dftm;
 	private String[] columnNames = new String[] { "ID", "Name", "Email" };;
+
 	/**
 	 * Create the panel.
 	 */
@@ -46,18 +48,19 @@ public class UserDelPanel extends JPanel {
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
 		dftm = (DefaultTableModel) table.getModel();
-//		columnNames = new String[] { "ID", "Name", "Password", "Email" };
+		// columnNames = new String[] { "ID", "Name", "Password", "Email" };
 		dftm.setColumnIdentifiers(columnNames);
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				int rowNum = table.getSelectedRow();
-//				int id = Integer.parseInt((String) table.getValueAt(rowNum, 0));
-//				if (id == 1) {
-//					delButton.setEnabled(false);
-//				} else {
-//					delButton.setEnabled(true);
-//				}
+				// int id = Integer.parseInt((String) table.getValueAt(rowNum,
+				// 0));
+				// if (id == 1) {
+				// delButton.setEnabled(false);
+				// } else {
+				// delButton.setEnabled(true);
+				// }
 
 				idField.setText((String) table.getValueAt(rowNum, 0));
 				nameField.setText((String) table.getValueAt(rowNum, 1));
@@ -79,7 +82,6 @@ public class UserDelPanel extends JPanel {
 		nameField = new JTextField();
 		add(nameField, new GBC(5, 9, 2, 1).setWeight(300, 100).setInsets(1).setFill(GridBagConstraints.HORIZONTAL));
 
-
 		JLabel emailLabel = new JLabel("EMail");
 		add(emailLabel, new GBC(8, 9, 1, 1).setWeight(100, 100).setInsets(1).setFill(GridBagConstraints.CENTER));
 
@@ -91,7 +93,7 @@ public class UserDelPanel extends JPanel {
 		delButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (idField.getText().length() != 0) {
-					
+
 					int id = Integer.parseInt(idField.getText());
 					UserDao userDao = new UserDao();
 					userDao.delete(userDao.getById(id));
@@ -103,12 +105,40 @@ public class UserDelPanel extends JPanel {
 
 		saveButton = new JButton("Save");
 		add(saveButton, new GBC(8, 10, 1, 1).setWeight(100, 100).setInsets(1).setFill(GridBagConstraints.HORIZONTAL));
+		saveButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				if (isInputValid()) {
+					User user = new User(Integer.parseInt(idField.getText()), nameField.getText(),
+							emailField.getText());
+					new UserDao().update(user);
+					
+					initTable();
+				}
+			}
+		});
 	}
-	
+
+	public boolean isInputValid() {
+		String username = nameField.getText();
+		if (username.length() == 0) {
+			JOptionPane.showMessageDialog(null, "Username can't be null");
+			return false;
+		}
+
+		String email = emailField.getText();
+		if (!EmailValidator.getInstance().isValid(email)) {
+			JOptionPane.showMessageDialog(null, "Invalid Email addresss");
+			return false;
+		}
+
+		return true;
+	}
+
 	public void initTable() {
 		String[] rowData = new String[3];
 		dftm.setDataVector(null, columnNames);
-		
+
 		UserDao userDao = new UserDao();
 
 		List<User> list = userDao.findAll();

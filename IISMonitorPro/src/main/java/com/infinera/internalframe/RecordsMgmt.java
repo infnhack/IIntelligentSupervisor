@@ -70,7 +70,7 @@ public class RecordsMgmt extends JInternalFrame {
 	 * Create the frame.
 	 */
 	public RecordsMgmt() {
-		setBounds(100, 100, 900, 400);
+		setBounds(0, 0, 900, 400);
 		setClosable(true);
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		// gridBagLayout.rowWeights = new double[] {1.0, 1.0, 1.0, 1.0, 1.0,
